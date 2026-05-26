@@ -1,0 +1,22 @@
+#!/bin/bash
+# Start the free-claude-code proxy and launch Claude Code with OpenRouter (Haiku) backend
+
+REPO_DIR="/mnt/c/Users/oussama/.gemini/antigravity/scratch/free-claude-code"
+
+# Ensure uv is in PATH
+export PATH="$HOME/.local/bin:$PATH"
+
+# Check if port 8085 is already active
+if ! lsof -i :8085 -t >/dev/null; then
+    # Start proxy in background
+    cd "$REPO_DIR" && MODEL="open_router/anthropic/claude-3.5-haiku" MODEL_OPUS="open_router/anthropic/claude-3.5-haiku" MODEL_SONNET="open_router/anthropic/claude-3.5-haiku" MODEL_HAIKU="open_router/anthropic/claude-3.5-haiku" uv run uvicorn server:app --host 0.0.0.0 --port 8085 --app-dir "$REPO_DIR" >/dev/null 2>&1 &
+    # Give server a moment to start
+    sleep 3
+fi
+
+# Launch Claude Code pointed at local proxy
+export ANTHROPIC_AUTH_TOKEN="freecc"
+export ANTHROPIC_BASE_URL="http://localhost:8085"
+
+# Execute claude with all arguments passed
+exec claude "$@"

@@ -1,0 +1,22 @@
+#!/bin/bash
+# Start the free-claude-code proxy and launch Claude Code with Ollama Cloud backend
+
+REPO_DIR="/mnt/c/Users/oussama/.gemini/antigravity/scratch/free-claude-code"
+
+# Ensure uv is in PATH
+export PATH="$HOME/.local/bin:$PATH"
+
+# Check if port 8083 is already active
+if ! lsof -i :8083 -t >/dev/null; then
+    # Start proxy in background
+    cd "$REPO_DIR" && OLLAMA_BASE_URL="https://ollama.com" OLLAMA_API_KEY="8580bc0c146d4cf499684c256677a35f.-02lv_V8AeTtn-ciXqPSMz1Y" MODEL="ollama/gemma4:cloud" MODEL_OPUS="ollama/gemma4:cloud" MODEL_SONNET="ollama/gemma4:cloud" MODEL_HAIKU="ollama/gemma4:cloud" uv run uvicorn server:app --host 0.0.0.0 --port 8083 --app-dir "$REPO_DIR" >/dev/null 2>&1 &
+    # Give server a moment to start
+    sleep 3
+fi
+
+# Launch Claude Code pointed at local proxy
+export ANTHROPIC_AUTH_TOKEN="freecc"
+export ANTHROPIC_BASE_URL="http://localhost:8083"
+
+# Execute claude with all arguments passed
+exec claude "$@"

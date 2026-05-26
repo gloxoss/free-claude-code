@@ -140,6 +140,10 @@ class Settings(BaseSettings):
     )
 
     # ==================== Ollama Config ====================
+    ollama_api_key: str = Field(
+        default="",
+        validation_alias="OLLAMA_API_KEY",
+    )
     ollama_base_url: str = Field(
         default="http://localhost:11434",
         validation_alias="OLLAMA_BASE_URL",
